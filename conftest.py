@@ -30,7 +30,7 @@ def many_obj_ids():
     for payload in get_all_from_seller_payload:
         create_obj.create_obj(payload=payload)
         create_obj.check_200()
-        ids.append(create_obj.response['status'].split()[1])
+        ids.append(create_obj.response_json['status'].split()[1])
     yield ids
     delete_obj = DeleteObj()
     for id in ids:
