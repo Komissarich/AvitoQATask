@@ -1,0 +1,9 @@
+__pycache__
+*.pyc
+.pytest_cache
+test_artifacts
+.git
+.venv
+venv
+*.log
+*.png
