@@ -6,4 +6,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY endpoints/ ./endpoints/
 COPY tests/ ./tests/
 COPY conftest.py .
-CMD ["pytest", ".", "-v", "-s"]
+CMD ["pytest", ".", "-v", "-s", "--reruns", "3", "--reruns-delay" ,"1", "--only-rerun", "504"]
