@@ -5,10 +5,10 @@ class CreateObj(BaseEndpoint):
 
     def create_obj(self, payload):
         self.response = requests.post(f"{self.base_url}/api/1/item", json=payload)
-        try:
-            self.response_json = self.response.json()
-            print("result", self.response_json)
-        except:
-            print("Error", self.response.text)
+        if self.response.status_code == 200:
+            try:
+                self.response_json = self.response.json()
+            except:
+                self.response_json = None
 
     

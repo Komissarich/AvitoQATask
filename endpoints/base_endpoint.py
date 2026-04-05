@@ -8,7 +8,6 @@ class BaseEndpoint:
 
 
     def check_200(self):
-        print( "STATUSCODE", self.response.status_code)
         assert self.response.status_code == 200
 
     def check_400(self):

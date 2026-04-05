@@ -1,0 +1,267 @@
+test_cases:
+  positive:
+    - name: "test_get_obj"
+      description: "Получение объявления по ID"
+      endpoint: "GET /api/1/item/{id}"
+      test_function: "test_get_obj"
+      dependencies:
+        - "obj_id (fixture)"
+      assertions:
+        - "status_code == 200"
+        - "response_json matches fixture_payload"
+      check_methods:
+        - "check_200()"
+        - "check_obj(obj_id, fixture_payload)"
+
+    - name: "test_get_all_objects"
+      description: "Получение всех объявлений продавца"
+      endpoint: "GET /api/1/{sellerID}/item"
+      test_function: "test_get_all_objects"
+      dependencies:
+        - "seller_id (fixture)"
+        - "many_obj_ids (fixture)"
+      assertions:
+        - "status_code == 200"
+        - "all created objects are present in response"
+      check_methods:
+        - "check_200()"
+        - "check_all_objs(many_obj_ids, get_all_from_seller_payload)"
+
+    - name: "test_delete_obj"
+      description: "Удаление объявления по ID"
+      endpoint: "DELETE /api/2/item/{id}"
+      test_function: "test_delete_obj"
+      dependencies:
+        - "creates object dynamically"
+      assertions:
+        - "status_code == 200"
+        - "object is deleted"
+      check_methods:
+        - "check_200()"
+
+    - name: "test_get_stat_v1"
+      description: "Получение статистики по объявлению (API v1)"
+      endpoint: "GET /api/1/statistic/{id}"
+      test_function: "test_get_stat_v1"
+      dependencies:
+        - "obj_id (fixture)"
+      assertions:
+        - "status_code == 200"
+        - "statistics matches fixture_payload"
+      check_methods:
+        - "check_200()"
+        - "check_stat(fixture_payload)"
+
+    - name: "test_get_stat_v2"
+      description: "Получение статистики по объявлению (API v2)"
+      endpoint: "GET /api/2/statistic/{id}"
+      test_function: "test_get_stat_v2"
+      dependencies:
+        - "obj_id (fixture)"
+      assertions:
+        - "status_code == 200"
+        - "statistics matches fixture_payload"
+      check_methods:
+        - "check_200()"
+        - "check_stat(fixture_payload)"
+
+  negative:
+    create_object:
+      - name: "test_create_obj_negative - sellerID as string"
+        endpoint: "POST /api/1/item"
+        payload:
+          { "sellerID": "not_a_number", "name": "John Doe", "price": 100 }
+        expected_status: 400
+
+      - name: "test_create_obj_negative - negative sellerID"
+        endpoint: "POST /api/1/item"
+        payload: { "sellerID": -5, "name": "John Doe", "price": 100 }
+        expected_status: 400
+
+      - name: "test_create_obj_negative - empty name"
+        endpoint: "POST /api/1/item"
+        payload: { "sellerID": 333447, "name": "", "price": 100 }
+        expected_status: 400
+
+      - name: "test_create_obj_negative - missing sellerID"
+        endpoint: "POST /api/1/item"
+        payload: { "name": "John Doe", "price": 100 }
+        expected_status: 400
+
+      - name: "test_create_obj_negative - missing name"
+        endpoint: "POST /api/1/item"
+        payload: { "sellerID": 333447, "price": 100 }
+        expected_status: 400
+
+      - name: "test_create_obj_negative - missing price"
+        endpoint: "POST /api/1/item"
+        payload: { "sellerID": 333447, "name": "John Doe" }
+        expected_status: 400
+
+      - name: "test_create_obj_negative - empty payload"
+        endpoint: "POST /api/1/item"
+        payload: {}
+        expected_status: 400
+
+      - name: "test_create_obj_negative - invalid statistics types"
+        endpoint: "POST /api/1/item"
+        payload:
+          {
+            "sellerID": 333447,
+            "name": "John Doe",
+            "price": 100,
+            "statistics":
+              { "likes": "ten", "viewCount": "five", "contacts": "one" },
+          }
+        expected_status: 400
+
+      - name: "test_create_obj_negative - extra field"
+        endpoint: "POST /api/1/item"
+        payload:
+          {
+            "sellerID": 333447,
+            "name": "John Doe",
+            "price": 100,
+            "extra_field": "something",
+          }
+        expected_status: 400
+
+    get_object:
+      - name: "test_get_object_negative - invalid UUID format"
+        endpoint: "GET /api/1/item/{id}"
+        id: "invalid-uuid"
+        expected_status: 400
+
+      - name: "test_get_object_negative - empty string"
+        endpoint: "GET /api/1/item/{id}"
+        id: ""
+        expected_status: 404
+
+      - name: "test_get_object_negative - spaces only"
+        endpoint: "GET /api/1/item/{id}"
+        id: "   "
+        expected_status: 400
+
+      - name: "test_get_object_negative - non-existent UUID"
+        endpoint: "GET /api/1/item/{id}"
+        id: "aae922fd-e0e4-4803-88c1-8a8071cad2b8"
+        expected_status: 404
+
+      - name: "test_get_object_negative - too short"
+        endpoint: "GET /api/1/item/{id}"
+        id: "12345"
+        expected_status: 400
+
+    get_all_objects:
+      - name: "test_get_all_objects_negative - empty sellerID"
+        endpoint: "GET /api/1/{sellerID}/item"
+        seller_id: ""
+        expected_status: 405
+
+      - name: "test_get_all_objects_negative - spaces only"
+        endpoint: "GET /api/1/{sellerID}/item"
+        seller_id: "   "
+        expected_status: 400
+
+      - name: "test_get_all_objects_negative - alphabetic string"
+        endpoint: "GET /api/1/{sellerID}/item"
+        seller_id: "abc"
+        expected_status: 400
+
+      - name: "test_get_all_objects_negative - numeric string"
+        endpoint: "GET /api/1/{sellerID}/item"
+        seller_id: "12345"
+        expected_status: 200
+
+    get_statistic_v1:
+      - name: "test_get_statistic_v1_negative - invalid UUID"
+        endpoint: "GET /api/1/statistic/{id}"
+        id: "invalid-uuid"
+        expected_status: 400
+
+      - name: "test_get_statistic_v1_negative - spaces only"
+        endpoint: "GET /api/1/statistic/{id}"
+        id: "   "
+        expected_status: 400
+
+      - name: "test_get_statistic_v1_negative - too short"
+        endpoint: "GET /api/1/statistic/{id}"
+        id: "123"
+        expected_status: 400
+
+      - name: "test_get_statistic_v1_negative - empty string"
+        endpoint: "GET /api/1/statistic/{id}"
+        id: ""
+        expected_status: 404
+
+      - name: "test_get_statistic_v1_negative - non-existent UUID"
+        endpoint: "GET /api/1/statistic/{id}"
+        id: "e2ab0d8b-428f-4e13-a078-bfd807f1b64f"
+        expected_status: 404
+
+    get_statistic_v2:
+      - name: "test_get_statistic_v2_negative - invalid UUID"
+        endpoint: "GET /api/2/statistic/{id}"
+        id: "invalid-uuid"
+        expected_status: 404
+
+      - name: "test_get_statistic_v2_negative - empty string"
+        endpoint: "GET /api/2/statistic/{id}"
+        id: ""
+        expected_status: 404
+
+      - name: "test_get_statistic_v2_negative - spaces only"
+        endpoint: "GET /api/2/statistic/{id}"
+        id: "   "
+        expected_status: 404
+
+      - name: "test_get_statistic_v2_negative - too short"
+        endpoint: "GET /api/2/statistic/{id}"
+        id: "123"
+        expected_status: 404
+
+      - name: "test_get_statistic_v2_negative - non-existent UUID"
+        endpoint: "GET /api/2/statistic/{id}"
+        id: "e2ab0d8b-428f-4e13-a078-bfd807f1b64f"
+        expected_status: 404
+
+    delete_item:
+      - name: "test_delete_item_negative - invalid UUID"
+        endpoint: "DELETE /api/2/item/{id}"
+        id: "invalid-uuid"
+        expected_status: 400
+
+      - name: "test_delete_item_negative - empty string"
+        endpoint: "DELETE /api/2/item/{id}"
+        id: ""
+        expected_status: 404
+
+      - name: "test_delete_item_negative - spaces only"
+        endpoint: "DELETE /api/2/item/{id}"
+        id: "   "
+        expected_status: 400
+
+      - name: "test_delete_item_negative - too short"
+        endpoint: "DELETE /api/2/item/{id}"
+        id: "12345"
+        expected_status: 400
+
+      - name: "test_delete_item_negative - non-existent UUID"
+        endpoint: "DELETE /api/2/item/{id}"
+        id: "00000000-0000-0000-0000-000000000000"
+        expected_status: 404
+
+  performance:
+    - name: "test_response_time_get_item"
+      description: "GET /api/1/item/{id} должен выполняться менее чем за 500 мс"
+      endpoint: "GET /api/1/item/{id}"
+      threshold_ms: 500
+      test_function: "test_response_time_get_item"
+      dependencies:
+        - "obj_id (fixture)"
+
+    - name: "test_response_time_create_item"
+      description: "POST /api/1/item должен выполняться менее чем за 1000 мс"
+      endpoint: "POST /api/1/item"
+      threshold_ms: 1000
+      test_function: "test_response_time_create_item"

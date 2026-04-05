@@ -5,7 +5,8 @@ class GetObj(BaseEndpoint):
 
     def get_obj(self, id):
         self.response = requests.get(f"{self.base_url}/api/1/item/{id}")
-        self.response_json = self.response.json()[0]
+        if self.response.status_code == 200 and self.response.json() and len(self.response.json()) > 0:
+            self.response_json = self.response.json()[0]
 
     def check_obj(self, id, payload):
         assert self.response_json['id'] == id

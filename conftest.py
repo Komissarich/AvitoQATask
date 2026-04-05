@@ -2,9 +2,8 @@ import pytest
 from endpoints.create_obj import CreateObj
 from endpoints.del_obj import DeleteObj
 from endpoints.get_all_objs import GetAllObjects
-from tests.test_data.results import *
 from tests.test_data.payloads import *
-
+import time
 
 
 @pytest.fixture
@@ -15,7 +14,7 @@ def obj_id():
     id = create_obj.response_json['status'].split()[3]
     yield id
     delete_obj = DeleteObj()
-    delete_obj.del_obj(id=id)
+    delete_obj.del_obj(id)
     delete_obj.check_200()
 
 
@@ -37,9 +36,11 @@ def many_obj_ids():
         create_obj.create_obj(payload=payload)
         create_obj.check_200()
         ids.append(create_obj.response_json['status'].split()[3])
+        time.sleep(0.5)
+    time.sleep(1)
     yield ids
     
     for id in ids:
-        print("ID", id)
+
         delete_obj.del_obj(id)
         delete_obj.check_200()
