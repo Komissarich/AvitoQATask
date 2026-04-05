@@ -14,7 +14,7 @@ fixture_payload = {
 
 
 get_all_from_seller_payload = [{
-    "sellerID": DEFAULT_SELLER_ID,
+    "sellerId": DEFAULT_SELLER_ID,
     "name": "John Doe",
     "price": 100,
     "statistics": {
@@ -24,7 +24,7 @@ get_all_from_seller_payload = [{
     }
 },
 {
-    "sellerID": DEFAULT_SELLER_ID,
+    "sellerId": DEFAULT_SELLER_ID,
     "name": "Example",
     "price": 200,
     "statistics": {
@@ -34,9 +34,9 @@ get_all_from_seller_payload = [{
     }
 },
 {
-    "sellerID": DEFAULT_SELLER_ID,
+    "sellerId": DEFAULT_SELLER_ID,
     "name": "Unknown",
-    "price": 0,
+    "price": 40,
     "statistics": {
         "likes": 5,
         "viewCount": 5,

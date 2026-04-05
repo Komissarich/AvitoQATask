@@ -5,6 +5,8 @@ class DeleteObj(BaseEndpoint):
 
     def del_obj(self, id):
         self.response = requests.delete(f"{self.base_url}/api/2/item/{id}")
-        if self.response.text:
+        try:
             self.response_json = self.response.json()
+        except:
+            pass
 
